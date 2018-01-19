@@ -7,7 +7,7 @@ OpenWRT-IoT is an open-source project to convert your OpenWRT router into a home
 ## Prerequisites
 1. OpenWRT powered router
 2. Incoming http(s) access to the router from internet. You may need to set up NAT for http(s) service to be accessible from internet
-3. DO NOT install LuCI, as it clashes with this project
+3. DO NOT use LuCI together with openwrt-iot, as it will get exposed to internet too
 
 ## Get started
 1. Install dependencies  
