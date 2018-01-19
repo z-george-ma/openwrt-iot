@@ -9,7 +9,7 @@ OpenWRT-IoT is an open-source project to convert your OpenWRT router into a home
 2. Incoming http(s) access to the router from internet. You may need to set up NAT for http(s) service to be accessible from internet
 
 ## Get started
-1. Install dependencies
+1. Install dependencies  
 *# opkg update && opkg install uhttpd uhttpd-mod-lua uhttpd-mod-tls luci-lib-nixio libuci-lua*
 
 2. Copy all files in src/ to /usr/lib/lua/iot/
@@ -23,23 +23,23 @@ OpenWRT-IoT is an open-source project to convert your OpenWRT router into a home
 4. Create /etc/config/iot with the following content
 ```
 # webfilter module to enable / disable web filter
-config actuator webfilter
+config module webfilter
     option 'key' 'some random string' # user generated key for webhook authentication
     option 'hosts_default' '/etc/hosts.default'
     option 'hosts_filter' '/etc/hosts.filter'
 
 # service module to start / stop Linux services
-config actuator service
+config module service
     option 'key' 'some random string' # user generated key for webhook authentication
 ```
 
 5. (optional, recommended) Get a public domain name and SSL certificate for uhttpd
 
-6. Restart uhttpd
+6. Restart uhttpd  
 *# /etc/init.d/uhttpd enable && /etc/init.d/uhttpd start*
 
 7. Integration with IFTTT
-In IFTTT actions, use webhook with the format like this:
+In IFTTT actions, use webhook with the format like this:  
 *POST* `https://your_host/iot/webfilter`
 ```
 {
