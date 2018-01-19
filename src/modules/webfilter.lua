@@ -1,3 +1,5 @@
+require 'nixio'
+
 return function (config, body)
   nixio.fs.unlink('/etc/hosts')
 

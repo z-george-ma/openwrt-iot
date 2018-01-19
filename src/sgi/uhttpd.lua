@@ -1,7 +1,4 @@
-require 'nixio'
-
 local json = require 'iot.json'
-
 local config = require 'iot.config'
 
 function handle_request(env)
