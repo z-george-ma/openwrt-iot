@@ -100,4 +100,4 @@ config module service
 ## Contributing
 If you would like to request a feature or suggest a module, please [open a new issue](https://github.com/z-george-ma/openwrt-iot/issues/new) against this repository.
 
-When contributing to this repository, it is highly recommended to first discuss the change you wish to make via Github Issue. Pull requests are welcomed. In general, we follow the "fork-and-pull" Git workflow.w
+When contributing to this repository, it is highly recommended to first discuss the change you wish to make via Github Issue. Pull requests are welcomed. In general, we follow the "fork-and-pull" Git workflow.
