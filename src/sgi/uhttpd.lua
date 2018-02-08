@@ -1,4 +1,4 @@
-local json = require 'iot.json'
+local json = require 'cjson'
 local config = require 'iot.config'
 
 function handle_request(env)

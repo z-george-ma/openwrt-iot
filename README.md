@@ -11,7 +11,7 @@ OpenWRT-IoT is an open-source project to convert your OpenWRT router into a home
 
 ## Get started
 1. Install dependencies  
-*# opkg update && opkg install uhttpd uhttpd-mod-lua uhttpd-mod-tls luci-lib-nixio libuci-lua*
+*# opkg update && opkg install uhttpd uhttpd-mod-lua uhttpd-mod-tls luci-lib-nixio libuci-lua lua-cjson libmosquitto lua-mosquitto*
 
 2. Copy all files in src/ to /usr/lib/lua/iot/
 
