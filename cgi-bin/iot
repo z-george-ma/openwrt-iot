@@ -1,0 +1,5 @@
+#!/usr/bin/lua
+require('iot.sgi.http')
+local run = require('iot.sgi.handler')
+
+run()

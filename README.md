@@ -6,94 +6,134 @@ OpenWRT-IoT is an open-source project to convert your OpenWRT router into a home
 
 ## Prerequisites
 1. OpenWRT powered router
-2. Incoming http(s) access to the router from internet. You may need to set up NAT for http(s) service to be accessible from internet
-3. DO NOT use LuCI together with openwrt-iot, as it will get exposed to internet too
+2. Public http(s) access to the router. You may need to set up DNAT for http(s) service to be accessible from internet
 
 ## Get started
-1. Install dependencies  
-*# opkg update && opkg install uhttpd uhttpd-mod-lua uhttpd-mod-tls luci-lib-nixio libuci-lua lua-cjson libmosquitto lua-mosquitto*
+1. Configure uhttp
+Typical OpenWRT setup already includes *uhttpd* and *luci* related package e.g. *luci-lib-nixio*. In order to make OpenWRT-IoT work with *luci*, add the following section to */etc/config/uhttpd*
 
-2. Copy all files in src/ to /usr/lib/lua/iot/
-
-3. Add the following lines into /etc/config/uhttpd
 ```
-        option lua_prefix       /iot
-        option lua_handler      /usr/lib/lua/iot/sgi/uhttpd.lua
+config uhttpd 'iot'
+# replace 0.0.0.0 with your router LAN IP if you don't want exposing the http service to internet
+        list listen_http '0.0.0.0:88'
+# https will require a valid SSL certificate
+        list listen_https '0.0.0.0:443'
+        option redirect_https '0'
+        option home '/web'
+        option rfc1918_filter '1'
+        option max_requests '3'
+        option max_connections '100'
+# valid SSL certificate.
+        option cert '/etc/uhttpd.crt'
+        option key '/etc/uhttpd.key'
+        option cgi_prefix '/cgi-bin'
+        option script_timeout '60'
+        option network_timeout '30'
+        option http_keepalive '20'
+        option tcp_keepalive '1'
+        option no_dirlists '1'
+        option ubus_prefix '/ubus'
 ```
 
-4. Create /etc/config/iot with the following content
-```
-# webfilter module to enable / disable web filter
-config module webfilter
-    option 'key' 'some random string' # user generated key for webhook authentication
-    option 'hosts_default' '/etc/hosts.default'
-    option 'hosts_filter' '/etc/hosts.filter'
+Note: https will require *libuhttpd-mbedtls* to be installed.
 
-# service module to start / stop Linux services
-config module service
-    option 'key' 'some random string' # user generated key for webhook authentication
+2. Restart *uhttpd* to apply new configuration
+```
+/etc/init.d/uhttpd restart
 ```
 
-5. (optional, recommended) Get a public domain name and SSL certificate for uhttpd
+3. Install additional dependencies  
+OpenWRT-IoT requires additional dependencies
 
-6. Restart uhttpd  
-*# /etc/init.d/uhttpd enable && /etc/init.d/uhttpd start*
+```
+opkg update && opkg install lua-cjson libuci-lua
+```
 
-7. Integration with IFTTT
+4. Copy all files under src/ to /usr/lib/lua/iot/
+
+5. Create */web/cgi-bin* folder and copy *cgi-bin/iot* over (with execute permission)
+
+6. Setup OpenWRT-IoT configuration file in */etc/config/iot*. Example configuration can be found at *config/iot*
+
+7. Integration with IFTTT and enjoy
 In IFTTT actions, use webhook with the format like this:  
-*POST* `https://your_host/iot/webfilter`
+*POST* `https://your_host/cgi-bin/iot`
 ```
 {
-  "key": "the key in /etc/config/iot",
-  "action": "enable"
+  "service": "kasa"
+  "key": "secret",
+  "action": "turn on"
 }
 ```
 
-## Modules
-### Web filter
-Turn on / off web filters based on host files and dnsmasq. Please refer to src/modules/webfilter.lua.
+## Modules 
+### Ad blocker
+Turn on / off ad blocker. Please refer to src/modules/adblocker.lua.
 
 #### Setup
-First install and set up dnsmasq on OpenWRT router.  
-Configure DNS server to point to dnsmasq.  
-Rename /etc/hosts to /etc/hosts.default.  
-Download the hosts file from https://github.com/StevenBlack/hosts and save as /etc/hosts.filter  
+With default Luci OpenWRT installation, in Network -> DHCP and DNS -> Resolv and Hosts Files, add Additional Hosts files as */etc/hosts.filter*
+
+Download the hosts file from https://github.com/StevenBlack/hosts and save as /etc/hosts.adblocker  
 
 #### Configuration
-Add the following line to /etc/config/iot
-```
-config module webfilter
-    option 'key' 'abcd' # user generated key for webhook authentication
-    option 'hosts_default' '/etc/hosts.default'
-    option 'hosts_filter' '/etc/hosts.filter'
-```
+Refer to example in *config/iot*
 
 #### Webhook
-*POST* `https://your_host/iot/webfilter`
+*POST* `https://your_host/cgi-bin/iot`
 ```
 {
-  "key": "abcd", // the key specified in the config
-  "action": "enable" // enable or disable
+  "service": "adblocker",
+  "key": "secret", // the key specified in the config
+  "action": "enable" // enable | disable
 }
 ```
 
-### Service
-Turn on / off Linux services. Please refer to src/modules/service.lua.
+### Linux Service
+Turn on / off Linux services. Please refer to src/modules/openwrt.lua.
 
 #### Configuration
-Add the following line to /etc/config/iot
-```
-config module service
-    option 'key' 'abcd' # user generated key for webhook authentication
-```
+Refer to example in *config/iot*
 
 #### Webhook
-*POST* `https://your_host/iot/webfilter`
+*POST* `https://your_host/cgi-bin/iot`
 ```
 {
-  "key": "abcd", // the key specified in the config
+  "service": "service",
+  "key": "secret", // the key specified in the config
   "action": "start", // start/stop/restart
   "name": "openvpn" // service name, e.g. openvpn
+}
+```
+
+### Kasa smart switch
+Control TP-Link Kasa smart switches. Please refer to src/modules/kasa.lua.
+
+#### Configuration
+Refer to example in *config/iot*
+
+#### Webhook
+*POST* `https://your_host/cgi-bin/iot`
+```
+{
+  "service": "kasa",
+  "key": "secret", // the key specified in the config
+  "action": "turn on" // turn on | turn off
+}
+```
+
+### Philips WiZ smart light
+Control TP-Link Kasa smart switches. Please refer to src/modules/kasa.lua.
+
+#### Configuration
+Refer to example in *config/iot*
+
+#### Webhook
+*POST* `https://your_host/cgi-bin/iot`
+```
+{
+  "service": "wiz",
+  "key": "secret", // the key specified in the config
+  "action": "turn on" // turn on | turn off
 }
 ```
 

@@ -1,12 +1,10 @@
 require 'nixio'
 
 return function (config, body)
-  nixio.fs.unlink('/etc/hosts')
+  nixio.fs.unlink('/etc/hosts.filter')
 
   if body.action == 'enable' then
-    nixio.fs.link(config['hosts_filter'], '/etc/hosts')
-  else
-    nixio.fs.link(config['hosts_default'], '/etc/hosts')
+    nixio.fs.link(config['hostfile'], '/etc/hosts.filter')
   end
 
   if nixio.fork() == 0 then

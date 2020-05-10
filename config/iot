@@ -1,0 +1,30 @@
+# 
+# /etc/config/iot
+# 
+# Example of iot configuration file
+#
+
+# TPLink kasa smart switch
+config module kasa
+    # user generated key for webhook authentication
+    option 'key' 'secret'
+    # IP address of kasa switch
+    option 'ip' '192.168.1.111'
+
+# Philips WiZ smart light bulb
+config module wiz
+    # user generated key for webhook authentication
+    option 'key' 'secret'
+    # IP address of wiz light
+    option 'ip' '192.168.1.111'
+
+# Openwrt service
+config module openwrt
+    # user generated key for webhook authentication
+    option 'key' 'secret'
+
+# Ad Blocker
+config module adblocker
+    option 'key' 'secret'
+    option 'hostfile' '/etc/hosts.adblocker'
+

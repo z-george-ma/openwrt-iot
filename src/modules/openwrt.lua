@@ -11,7 +11,7 @@ return function (config, body)
     i:close()
     o:close()
 
-    nixio.exec('/etc/init.d/' .. body.name, body.action)
+    nixio.exec('/etc/init.d/' .. body.name:gsub('[/%.]',''), body.action)
   else
     return { status = 200 }
   end
